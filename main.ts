@@ -2,7 +2,7 @@ import schedule from "node-schedule";
 import { db } from "./db";
 import { convertCSTtoUTC } from "./utils/helpers";
 import { timeslotsTimes } from "./types";
-import { updateStatus } from "./jobs/jobs";
+import { releaseFunds, updateStatus } from "./jobs/jobs";
 import { DateTime } from "luxon";
 import { eq } from "drizzle-orm";
 import { timeslots } from "./db/schema";
@@ -44,6 +44,7 @@ function convertTimeslots(
     startTime: Date;
     endTime: Date;
     twoHoursAfter: Date;
+    eventId: string;
   }[] = [];
   for (const event of availableEvents) {
     times.push(
@@ -92,6 +93,7 @@ function convertTimeslots(
           startTime,
           endTime,
           twoHoursAfter,
+          eventId: timeslot.eventId,
         };
       })
     );
@@ -128,60 +130,46 @@ function scheduleJobs(
         await updateStatus(times.id, "end");
         onCompletion(times.id);
       }),
-      twoHoursAfter: null,
+      twoHoursAfter: schedule.scheduleJob(
+        times.twoHoursAfter,
+        async () =>
+          await releaseFunds({ timeslotId: times.id, eventId: times.eventId })
+      ),
     };
   });
 }
 
 const jobs = new Map<string, ReturnType<typeof scheduleJobs>[number]>();
-// const every15mins = schedule.scheduleJob("* * * * *", async () => {
-//   console.log("exceuted at", new Date().toLocaleString());
-//   // query for the available events
-//   // query for open so we know they've paid
-//   const data = await getAvailableEvents();
+const every15mins = schedule.scheduleJob("* * * * *", async () => {
+  console.log("executed at", new Date().toLocaleString());
+  // query for the available events
+  // query for open so we know they've paid
+  const data = await getAvailableEvents();
 
-//   let times = convertTimeslots(data);
+  let times = convertTimeslots(data);
 
-//   // only add new jobs
-//   // since we are querying every 15 mins we need to check if we don't currently have a job for that timeslot
-//   for (const time of times) {
-//     if (jobs.has(time.id)) {
-//       times = times.filter((timeItem) => timeItem.id !== time.id);
-//     }
-//   }
+  // only add new jobs
+  // since we are querying every 15 mins we need to check if we don't currently have a job for that timeslot
+  for (const time of times) {
+    if (jobs.has(time.id)) {
+      times = times.filter((timeItem) => timeItem.id !== time.id);
+    }
+  }
 
-//   if (times.length > 0) {
-//     // schedule the jobs
-//     // store the jobs in map
-//     // when completed delete the reference
-//     scheduleJobs(times, (timeslotId: string) => {
-//       if (jobs.has(timeslotId)) {
-//         jobs.delete(timeslotId);
-//       }
+  if (times.length > 0) {
+    // schedule the jobs
+    // store the jobs in map
+    // when completed delete the reference
+    scheduleJobs(times, (timeslotId: string) => {
+      if (jobs.has(timeslotId)) {
+        jobs.delete(timeslotId);
+      }
+      console.log("job completed", timeslotId);
+      // email the venue that timeslot is ended and you can release the funds
+    }).forEach((job) => {
+      jobs.set(job.id, job);
+    });
+  }
 
-//       console.log("job completed", timeslotId);
-//     }).forEach((job) => {
-//       jobs.set(job.id, job);
-//     });
-//   }
-
-//   console.log(jobs);
-// });
-
-async function main() {
-  //   const data = await getAvailableEvents();
-  //   let times = convertTimeslots(data);
-  //   console.log(times);
-  //   times = times.map(({ id }) => {
-  //     return {
-  //       id,
-  //       startTime: new Date(Date.now() + 10000000),
-  //       endTime: new Date(Date.now() + 10000000),
-  //       twoHoursAfter: new Date(Date.now() + 10000000),
-  //     };
-  //   });
-  //   const jobs = scheduleJobs(times, () => console.log("completed"));
-  //   console.log(jobs);
-}
-
-main();
+  console.log(jobs);
+});
