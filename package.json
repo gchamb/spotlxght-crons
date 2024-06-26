@@ -6,7 +6,8 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "tsc",
-    "build:watch": "tsc --w"
+    "build:watch": "tsc --w",
+    "start": "node --env-file=.env ./dist/main.js"
   },
   "keywords": [],
   "author": "",
