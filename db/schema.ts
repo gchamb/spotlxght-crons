@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   bigint,
+  boolean,
   date,
   float,
   index,
@@ -79,7 +80,7 @@ export const accounts = createTable(
       columns: [account.provider, account.providerAccountId],
     }),
     userIdIdx: index("account_userId_idx").on(account.userId),
-  })
+  }),
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -99,7 +100,7 @@ export const sessions = createTable(
   },
   (session) => ({
     userIdIdx: index("session_userId_idx").on(session.userId),
-  })
+  }),
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -120,7 +121,7 @@ export const genres = createTable(
   },
   (genre) => ({
     userIdIdx: index("genres_userId_idx").on(genre.userId),
-  })
+  }),
 );
 
 export const genresRelations = relations(genres, ({ one }) => ({
@@ -148,7 +149,7 @@ export const reviews = createTable(
   },
   (review) => ({
     userIdIdx: index("reviews_userId_idx").on(review.userId),
-  })
+  }),
 );
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -174,7 +175,7 @@ export const assets = createTable(
   },
   (asset) => ({
     userIdIdx: index("assets_userId_idx").on(asset.userId),
-  })
+  }),
 );
 
 export const assetsRelations = relations(assets, ({ one }) => ({
@@ -202,7 +203,7 @@ export const events = createTable(
   },
   (event) => ({
     userIdIdx: index("events_userId_idx").on(event.venueId),
-  })
+  }),
 );
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
@@ -235,7 +236,7 @@ export const timeslots = createTable(
   },
   (timeslot) => ({
     eventIdIdx: index("events_userId_idx").on(timeslot.eventId),
-  })
+  }),
 );
 
 export const timeslotsRelations = relations(timeslots, ({ one }) => ({
@@ -267,7 +268,7 @@ export const applications = createTable(
         application.userId,
       ],
     }),
-  })
+  }),
 );
 
 export const applicantsRelations = relations(applications, ({ one }) => ({
@@ -301,7 +302,7 @@ export const stripeCheckouts = createTable(
   },
   (checkout) => ({
     userIdIdx: index("checkout_userId_idx").on(checkout.userId),
-  })
+  }),
 );
 
 export const stripeCheckoutsRelations = relations(
@@ -311,7 +312,7 @@ export const stripeCheckoutsRelations = relations(
       fields: [stripeCheckouts.userId],
       references: [users.id],
     }),
-  })
+  }),
 );
 
 export const stripePayouts = createTable(
@@ -334,7 +335,7 @@ export const stripePayouts = createTable(
   },
   (payout) => ({
     accountIdIdx: index("payout_accountId_idx").on(payout.stripeAccountId),
-  })
+  }),
 );
 
 export const stripePayoutsRelations = relations(stripePayouts, ({ one }) => ({
@@ -343,3 +344,50 @@ export const stripePayoutsRelations = relations(stripePayouts, ({ one }) => ({
     references: [users.stripeAccountId],
   }),
 }));
+
+export const stripeTransfers = createTable(
+  "stripe_transfer",
+  {
+    id: varchar("id", { length: 191 }).notNull().primaryKey(),
+    currency: varchar("currency", { length: 5 }).notNull().default("usd"),
+    amount: int("amount").notNull(),
+    reversed: boolean("reversed").notNull(),
+    balanceTransaction: varchar("balanceTransaction", {
+      length: 191,
+    }).notNull(),
+    transferGroup: varchar("transferGroup", { length: 191 })
+      .notNull()
+      .references(() => events.id),
+    timeslotId: varchar("timeslotId", { length: 191 })
+      .notNull()
+      .references(() => timeslots.id),
+    userId: varchar("userId", { length: 191 })
+      .notNull()
+      .references(() => users.id),
+    destination: varchar("destination", { length: 191 })
+      .notNull()
+      .references(() => users.stripeAccountId),
+    createdAt: timestamp("createdAt", { mode: "date" }).notNull().defaultNow(),
+  },
+  (transfers) => ({
+    accountIdIdx: index("transfer_accountId_idx").on(transfers.destination),
+  }),
+);
+
+export const stripeTransfersRelations = relations(
+  stripeTransfers,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [stripeTransfers.userId],
+      references: [users.id],
+    }),
+    event: one(events, {
+      fields: [stripeTransfers.transferGroup],
+      references: [events.id],
+    }),
+    timeslot: one(timeslots, {
+      fields: [stripeTransfers.timeslotId],
+      references: [timeslots.id],
+    }),
+  }),
+);

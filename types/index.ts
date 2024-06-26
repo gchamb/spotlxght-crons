@@ -35,6 +35,8 @@ export type SetApplicantStatusRequest = z.infer<
 
 export type ApplyTimeslotRequest = z.infer<typeof applyTimeslotRequest>;
 
+export type ReleaseFundsRequest = z.infer<typeof releaseFundsRequest>;
+
 export type GoogleInfo = {
   id: string;
   email: string;
@@ -187,7 +189,7 @@ export const myEventsDataSchema = z.object({
     z.literal("completed"),
     z.literal("closed"),
   ]),
-  date: z.date(),
+  date: z.string(),
   amount: z.number(),
   venueId: z.string().uuid(),
   createdAt: z.date(),
@@ -224,6 +226,12 @@ export const setApplicantStatusRequest = z.object({
 export const applyTimeslotRequest = z.object({
   eventId: z.string(),
   timeslotId: z.string(),
+});
+
+export const releaseFundsRequest = z.object({
+  eventId: z.string().min(1, "Invalid Request"),
+  timeslotId: z.string().min(1, "Invalid Request"),
+  userId: z.string().min(1, "Invalid Request"),
 });
 
 export function isValidZodLiteralUnion<T extends z.ZodLiteral<unknown>>(
