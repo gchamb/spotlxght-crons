@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { timeslotsTimes, TimeslotTimes } from "../types";
+import { TimeslotTimes } from "../types";
 
 function convertTo24hours(period: string, hours: number) {
   // convert to twenty four hours

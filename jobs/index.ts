@@ -35,7 +35,7 @@ export async function updateStatus(
       console.log(`Timeslot ID ${timeslotId} doesn't exist.`);
       return;
     }
-    console.log(type, timeslot.status);
+
     // update the status to in-progress or completed
     // update the event status
     if (type === "start" && timeslot.status === "open") {
