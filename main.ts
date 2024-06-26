@@ -4,10 +4,16 @@ import {
   getAvailableEvents,
   convertTimeslots,
 } from "./utils/main";
+import { DateTime } from "luxon";
 
 const jobs = new Map<string, ReturnType<typeof scheduleJobs>[number]>();
 const everyMin = schedule.scheduleJob("* * * * *", async () => {
-  console.log("Executed at", new Date().toLocaleString());
+  console.log(
+    "Executed at",
+    DateTime.fromISO(new Date().toISOString(), {
+      zone: "America/Chicago",
+    }).toLocaleString(DateTime.DATETIME_FULL)
+  );
   // query for the available events
   // query for open so we know they've paid
   const data = await getAvailableEvents();

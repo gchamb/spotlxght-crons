@@ -2,6 +2,7 @@ import { eq, and } from "drizzle-orm";
 import { db } from "../db";
 import { applications, events, timeslots } from "../db/schema";
 import { ReleaseFundsRequest } from "../types";
+import { envs } from "../utils/main";
 
 /**
  * This function updates the status of both the timeslot and event as one transaction
@@ -112,7 +113,7 @@ export async function releaseFunds({
       userId: applicant.userId,
     };
 
-    await fetch(`${process.env.APP_ORIGIN}/api/stripe/release`, {
+    await fetch(`${envs.APP_ORIGIN}/api/stripe/release`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {

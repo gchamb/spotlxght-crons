@@ -54,3 +54,19 @@ export function convertCSTtoUTC(
 
   return overrideTimeZone.toJSDate();
 }
+
+export function checkEnvs():
+  | { DATABASE_URL: string; APP_ORIGIN: string }
+  | never {
+  const { DATABASE_URL, APP_ORIGIN } = process.env;
+
+  if (DATABASE_URL === undefined || DATABASE_URL === "") {
+    throw new Error("The environment variable DATABASE_URL isn't set.");
+  }
+
+  if (APP_ORIGIN === undefined || APP_ORIGIN === "") {
+    throw new Error("The environment variable APP_ORIGIN isn't set.");
+  }
+
+  return { DATABASE_URL, APP_ORIGIN };
+}

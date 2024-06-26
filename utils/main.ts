@@ -5,7 +5,9 @@ import { db } from "../db";
 import { timeslots } from "../db/schema";
 import { updateStatus, releaseFunds } from "../jobs";
 import schedule from "node-schedule";
-import { convertCSTtoUTC } from "./helpers";
+import { checkEnvs, convertCSTtoUTC } from "./helpers";
+
+export const envs = checkEnvs();
 
 /**
  *
