@@ -49,13 +49,15 @@ export function convertTZtoUTC(
   // Create a Date object in local server time (whatever timezone our server is on)
   const configuredDate = new Date(year, month, day, hours, parseInt(match[2]));
 
-  return envs.TZ_ENV === "LOCAL"
-    ? DateTime.fromISO(configuredDate.toISOString(), {
-        zone: "America/Chicago",
-      }).toJSDate()
-    : DateTime.fromISO(configuredDate.toISOString(), {
-        zone: "America/Los_Angeles",
-      }).toJSDate();
+  // return envs.TZ_ENV === "LOCAL"
+  //   ? DateTime.fromISO(configuredDate.toISOString(), {
+  //       zone: "America/Chicago",
+  //     }).toJSDate()
+  //   : DateTime.fromISO(configuredDate.toISOString(), {
+  //       zone: "America/Los_Angeles",
+  //     }).toJSDate();
+
+  return configuredDate;
 }
 
 export function checkEnvs():
