@@ -17,8 +17,10 @@ const everyMin = schedule.scheduleJob("* * * * *", async () => {
   // query for the available events
   // query for open so we know they've paid
   const data = await getAvailableEvents();
+  console.log("available events", data);
 
   let times = convertTimeslots(data);
+  console.log("converted times", data);
 
   // only add new jobs
   // since we are querying every 15 mins we need to check if we don't currently have a job for that timeslot
@@ -42,4 +44,6 @@ const everyMin = schedule.scheduleJob("* * * * *", async () => {
       jobs.set(job.id, job);
     });
   }
+
+  console.log("current jobs", jobs);
 });
