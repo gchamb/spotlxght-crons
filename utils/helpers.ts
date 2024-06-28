@@ -45,12 +45,16 @@ export function convertTZtoUTC(
     day += 1;
   }
 
-  // Create a Date object in local server time (whatever timezone our server is on)
-  const configuredDate = new Date(year, month, day, hours, parseInt(match[2]));
-
-  const overrideTimeZone = DateTime.fromISO(configuredDate.toISOString(), {
-    zone: "America/Chicago",
-  });
+  const overrideTimeZone = DateTime.fromObject(
+    {
+      year,
+      month,
+      day,
+      hour: hours,
+      minute: parseInt(match[2]),
+    },
+    { zone: "America/Chicago" }
+  );
 
   return overrideTimeZone.toJSDate();
 }
