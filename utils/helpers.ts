@@ -1,6 +1,5 @@
 import { DateTime } from "luxon";
 import { TimeslotTimes } from "../types";
-import { envs } from "./main";
 
 function convertTo24hours(period: string, hours: number) {
   // convert to twenty four hours
@@ -49,19 +48,15 @@ export function convertTZtoUTC(
   // Create a Date object in local server time (whatever timezone our server is on)
   const configuredDate = new Date(year, month, day, hours, parseInt(match[2]));
 
-  // return envs.TZ_ENV === "LOCAL"
-  //   ? DateTime.fromISO(configuredDate.toISOString(), {
-  //       zone: "America/Chicago",
-  //     }).toJSDate()
-  //   : DateTime.fromISO(configuredDate.toISOString(), {
-  //       zone: "America/Los_Angeles",
-  //     }).toJSDate();
+  const overrideTimeZone = DateTime.fromISO(configuredDate.toISOString(), {
+    zone: "America/Chicago",
+  });
 
-  return configuredDate;
+  return overrideTimeZone.toJSDate();
 }
 
 export function checkEnvs():
-  | { DATABASE_URL: string; APP_ORIGIN: string; TZ_ENV: string }
+  | { DATABASE_URL: string; APP_ORIGIN: string }
   | never {
   const { DATABASE_URL, APP_ORIGIN, TZ_ENV } = process.env;
 
@@ -73,9 +68,5 @@ export function checkEnvs():
     throw new Error("The environment variable APP_ORIGIN isn't set.");
   }
 
-  if (TZ_ENV === undefined || TZ_ENV === "") {
-    throw new Error("The environment variable TZ_ENV isn't set.");
-  }
-
-  return { DATABASE_URL, APP_ORIGIN, TZ_ENV };
+  return { DATABASE_URL, APP_ORIGIN };
 }
