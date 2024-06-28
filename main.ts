@@ -24,7 +24,7 @@ const everyMin = schedule.scheduleJob("* * * * *", async () => {
   // only add new jobs
   // since we are querying every 15 mins we need to check if we don't currently have a job for that timeslot
   for (const time of times) {
-    console.log(time.startTime.toISOString(), time.endTime.toISOString());
+    console.log(time.startTime.toLocaleString(), time.endTime.toLocaleString());
     if (jobs.has(time.id)) {
       times = times.filter((timeItem) => timeItem.id !== time.id);
     }
