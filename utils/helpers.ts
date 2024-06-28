@@ -36,7 +36,7 @@ export function convertTZtoUTC(
 
   const dateSplit = date.split("-");
   const year = parseInt(dateSplit[0], 10);
-  const month = parseInt(dateSplit[1], 10) - 1; // Months are zero-indexed
+  const month = parseInt(dateSplit[1], 10)
   let day = parseInt(dateSplit[2], 10);
 
   hours = convertTo24hours(period, hours);
