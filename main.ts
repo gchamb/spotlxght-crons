@@ -17,14 +17,14 @@ const everyMin = schedule.scheduleJob("* * * * *", async () => {
   // query for the available events
   // query for open so we know they've paid
   const data = await getAvailableEvents();
-  console.log("available events", data);
 
   let times = convertTimeslots(data);
-  console.log("converted times", data);
+  console.log("converted times", times);
 
   // only add new jobs
   // since we are querying every 15 mins we need to check if we don't currently have a job for that timeslot
   for (const time of times) {
+    console.log(time.startTime.toISOString(), time.endTime.toISOString());
     if (jobs.has(time.id)) {
       times = times.filter((timeItem) => timeItem.id !== time.id);
     }
