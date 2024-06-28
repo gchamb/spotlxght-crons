@@ -21,21 +21,10 @@ const everyMin = schedule.scheduleJob(
     const data = await getAvailableEvents();
 
     let times = convertTimeslots(data);
-    console.log("converted times", times);
 
     // only add new jobs
     // since we are querying every 15 mins we need to check if we don't currently have a job for that timeslot
     for (const time of times) {
-      console.log(
-        DateTime.fromJSDate(time.startTime).toLocaleString(
-          DateTime.DATETIME_FULL
-        ),
-        time.startTime.toISOString(),
-        DateTime.fromJSDate(time.endTime).toLocaleString(
-          DateTime.DATETIME_FULL
-        ),
-        time.endTime.toISOString()
-      );
       if (jobs.has(time.id)) {
         times = times.filter((timeItem) => timeItem.id !== time.id);
       }
