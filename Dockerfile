@@ -1,7 +1,7 @@
 FROM node:20
 
 ENV DATABASE_URL ""
-ENV APP_ORIGIN "https://theunderground-dev.vercel.app"
+ENV APP_ORIGIN "https://dev.spotlxght.com"
 
 WORKDIR /app
 
