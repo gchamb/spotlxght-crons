@@ -5,7 +5,7 @@ import { db } from "../db";
 import { timeslots } from "../db/schema";
 import { updateStatus, releaseFunds } from "../jobs";
 import schedule from "node-schedule";
-import { checkEnvs, convertCSTtoUTC } from "./helpers";
+import { checkEnvs, convertTZtoUTC } from "./helpers";
 
 export const envs = checkEnvs();
 
@@ -71,8 +71,8 @@ export function convertTimeslots(
           nextDayForEndTime = true;
         }
 
-        const startTime = convertCSTtoUTC(event.date, timeslot.startTime);
-        const endTime = convertCSTtoUTC(
+        const startTime = convertTZtoUTC(event.date, timeslot.startTime);
+        const endTime = convertTZtoUTC(
           event.date,
           timeslot.endTime,
           nextDayForEndTime
@@ -84,7 +84,7 @@ export function convertTimeslots(
         const twoHoursTime =
           (timeslotsTimes.indexOf(timeslot.endTime) + 6) %
           timeslotsTimes.length;
-        const twoHoursAfter = convertCSTtoUTC(
+        const twoHoursAfter = convertTZtoUTC(
           event.date,
           timeslotsTimes[twoHoursTime],
           nextDayAfterTwoHours || nextDayForEndTime

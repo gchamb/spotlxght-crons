@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { TimeslotTimes } from "../types";
+import { envs } from "./main";
 
 function convertTo24hours(period: string, hours: number) {
   // convert to twenty four hours
@@ -19,7 +20,7 @@ function convertTo24hours(period: string, hours: number) {
   return hours;
 }
 
-export function convertCSTtoUTC(
+export function convertTZtoUTC(
   date: string,
   time: TimeslotTimes,
   nextDay?: boolean
@@ -52,13 +53,13 @@ export function convertCSTtoUTC(
     zone: "America/Chicago",
   });
 
-  return overrideTimeZone.toJSDate();
+  return envs.TZ_ENV === "LOCAL" ? overrideTimeZone.toJSDate() : configuredDate;
 }
 
 export function checkEnvs():
-  | { DATABASE_URL: string; APP_ORIGIN: string }
+  | { DATABASE_URL: string; APP_ORIGIN: string; TZ_ENV: string }
   | never {
-  const { DATABASE_URL, APP_ORIGIN } = process.env;
+  const { DATABASE_URL, APP_ORIGIN, TZ_ENV } = process.env;
 
   if (DATABASE_URL === undefined || DATABASE_URL === "") {
     throw new Error("The environment variable DATABASE_URL isn't set.");
@@ -68,5 +69,9 @@ export function checkEnvs():
     throw new Error("The environment variable APP_ORIGIN isn't set.");
   }
 
-  return { DATABASE_URL, APP_ORIGIN };
+  if (TZ_ENV === undefined || TZ_ENV === "") {
+    throw new Error("The environment variable TZ_ENV isn't set.");
+  }
+
+  return { DATABASE_URL, APP_ORIGIN, TZ_ENV };
 }
