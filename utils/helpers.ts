@@ -1,5 +1,9 @@
 import { DateTime } from "luxon";
-import { TimeslotTimes } from "../types";
+import { sendEmailRequest, TimeslotTimes } from "../types";
+import { envs } from "./main";
+import { z } from "zod";
+import { db } from "../db";
+import { apiKeys } from "../db/schema";
 
 function convertTo24hours(period: string, hours: number) {
   // convert to twenty four hours
@@ -36,7 +40,7 @@ export function convertTZtoUTC(
 
   const dateSplit = date.split("-");
   const year = parseInt(dateSplit[0], 10);
-  const month = parseInt(dateSplit[1], 10)
+  const month = parseInt(dateSplit[1], 10);
   let day = parseInt(dateSplit[2], 10);
 
   hours = convertTo24hours(period, hours);
@@ -73,4 +77,22 @@ export function checkEnvs():
   }
 
   return { DATABASE_URL, APP_ORIGIN };
+}
+
+export async function sendEmail(data: z.infer<typeof sendEmailRequest>) {
+  // fetch key
+  let key = await db.query.apiKeys.findFirst();
+
+  if (key === undefined) {
+    key = { id: crypto.randomUUID() };
+    await db.insert(apiKeys).values({ id: key.id });
+  }
+
+  await fetch(`${envs.APP_ORIGIN}/api/email/send`, {
+    method: "POST",
+    headers: {
+      "spotlxght-key": key.id,
+    },
+    body: JSON.stringify(data),
+  });
 }

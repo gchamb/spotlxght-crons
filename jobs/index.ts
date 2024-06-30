@@ -3,6 +3,7 @@ import { db } from "../db";
 import { applications, events, timeslots } from "../db/schema";
 import { ReleaseFundsRequest } from "../types";
 import { envs } from "../utils/main";
+import { sendEmail } from "../utils/helpers";
 
 /**
  * This function updates the status of both the timeslot and event as one transaction
@@ -90,23 +91,44 @@ export async function releaseFunds({
   timeslotId: string;
   eventId: string;
 }) {
-  try {
-    // get the applicant of this timeslot
-    const applicant = await db.query.applications.findFirst({
-      where: and(
-        eq(applications.timeslotId, timeslotId),
-        eq(applications.eventId, eventId),
-        eq(applications.status, "accepted")
-      ),
-      columns: {
-        userId: true,
+  // get the applicant of this timeslot
+  const applicant = await db.query.applications.findFirst({
+    where: and(
+      eq(applications.timeslotId, timeslotId),
+      eq(applications.eventId, eventId),
+      eq(applications.status, "accepted")
+    ),
+    columns: {
+      userId: true,
+      timeslotId: true,
+      eventId: true,
+    },
+    with: {
+      event: {
+        columns: {
+          name: true,
+        },
+        with: {
+          user: {
+            columns: {
+              email: true,
+            },
+          },
+        },
       },
-    });
+      user: {
+        columns: {
+          email: true,
+        },
+      },
+    },
+  });
 
-    if (applicant === undefined) {
-      return;
-    }
+  if (applicant === undefined) {
+    return;
+  }
 
+  try {
     const data: ReleaseFundsRequest = {
       eventId,
       timeslotId,
@@ -121,10 +143,20 @@ export async function releaseFunds({
       },
     });
     // email venue that we automatically released funds
+    await sendEmail({
+      subject: `Automatically released funds for ${applicant.event.name}`,
+      emails: [applicant.user.email, applicant.event.user.email],
+      message: `It's been two hours after the end timeslot. The funds have been automatically released to the musician.`,
+      type: "default",
+    });
   } catch (err) {
     // email us if this fails
     // email the venue and user this failed
-
-    console.error(err);
+    await sendEmail({
+      subject: `Automatically released funds has failed for ${applicant.event.name}`,
+      emails: ["gchamb.dev@gmail.com", "jcelaya775@gmail.com"],
+      message: `Automatically releasing funds after two hours post end timeslot has failed. Timeslot ID:${applicant.timeslotId} EventID: ${applicant.eventId}`,
+      type: "default",
+    });
   }
 }

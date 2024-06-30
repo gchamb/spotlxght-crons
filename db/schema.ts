@@ -80,7 +80,7 @@ export const accounts = createTable(
       columns: [account.provider, account.providerAccountId],
     }),
     userIdIdx: index("account_userId_idx").on(account.userId),
-  }),
+  })
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -100,7 +100,7 @@ export const sessions = createTable(
   },
   (session) => ({
     userIdIdx: index("session_userId_idx").on(session.userId),
-  }),
+  })
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -121,7 +121,7 @@ export const genres = createTable(
   },
   (genre) => ({
     userIdIdx: index("genres_userId_idx").on(genre.userId),
-  }),
+  })
 );
 
 export const genresRelations = relations(genres, ({ one }) => ({
@@ -149,7 +149,7 @@ export const reviews = createTable(
   },
   (review) => ({
     userIdIdx: index("reviews_userId_idx").on(review.userId),
-  }),
+  })
 );
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -175,7 +175,7 @@ export const assets = createTable(
   },
   (asset) => ({
     userIdIdx: index("assets_userId_idx").on(asset.userId),
-  }),
+  })
 );
 
 export const assetsRelations = relations(assets, ({ one }) => ({
@@ -203,7 +203,7 @@ export const events = createTable(
   },
   (event) => ({
     userIdIdx: index("events_userId_idx").on(event.venueId),
-  }),
+  })
 );
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
@@ -236,7 +236,7 @@ export const timeslots = createTable(
   },
   (timeslot) => ({
     eventIdIdx: index("events_userId_idx").on(timeslot.eventId),
-  }),
+  })
 );
 
 export const timeslotsRelations = relations(timeslots, ({ one }) => ({
@@ -268,7 +268,7 @@ export const applications = createTable(
         application.userId,
       ],
     }),
-  }),
+  })
 );
 
 export const applicantsRelations = relations(applications, ({ one }) => ({
@@ -302,7 +302,7 @@ export const stripeCheckouts = createTable(
   },
   (checkout) => ({
     userIdIdx: index("checkout_userId_idx").on(checkout.userId),
-  }),
+  })
 );
 
 export const stripeCheckoutsRelations = relations(
@@ -312,7 +312,7 @@ export const stripeCheckoutsRelations = relations(
       fields: [stripeCheckouts.userId],
       references: [users.id],
     }),
-  }),
+  })
 );
 
 export const stripePayouts = createTable(
@@ -335,7 +335,7 @@ export const stripePayouts = createTable(
   },
   (payout) => ({
     accountIdIdx: index("payout_accountId_idx").on(payout.stripeAccountId),
-  }),
+  })
 );
 
 export const stripePayoutsRelations = relations(stripePayouts, ({ one }) => ({
@@ -371,7 +371,7 @@ export const stripeTransfers = createTable(
   },
   (transfers) => ({
     accountIdIdx: index("transfer_accountId_idx").on(transfers.destination),
-  }),
+  })
 );
 
 export const stripeTransfersRelations = relations(
@@ -389,5 +389,12 @@ export const stripeTransfersRelations = relations(
       fields: [stripeTransfers.timeslotId],
       references: [timeslots.id],
     }),
-  }),
+  })
 );
+
+export const apiKeys = createTable("api_key", {
+  id: varchar("id", { length: 191 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+});

@@ -250,3 +250,13 @@ export function constructZodLiteralUnionType<T extends z.ZodLiteral<unknown>>(
   }
   return z.union(literals);
 }
+
+export const sendEmailRequest = z.object({
+  emails: z.array(z.string().email()),
+  subject: z.string().min(1, "heading must be at least 1 character."),
+  message: z.string(),
+  type: z.union([
+    z.literal("default"),
+    z.literal("other"), // will lead to more in the future
+  ]),
+});
